@@ -3,15 +3,15 @@
 		{ id: 1, name: 'Walk The Dog', status: 'Incomplete', category: 'Personal', date: '2024-09-30', completed: false },
 		{ id: 2, name: 'Do Homework', status: 'Incomplete', category: 'School', date: '2024-10-01', completed: false },
 	];
-	
+
+	let categories = ['Personal', 'Work', 'School', 'Fitness']; // Predefined categories
 	let newTodo = '';
 	let newCategory = '';
-	let newName = '';
 	let newDate = '';
 	let editingId = null;
 	let editingText = '';
-
-
+	let customCategory = ''; // To hold the custom category input
+	let addingNewCategory = false; // Tracks whether the user is adding a new category
 
 	// Add a new todo
 	function addTodo() {
@@ -28,6 +28,32 @@
 			newCategory = '';
 			newDate = '';
 		}
+	}
+
+	// Add a new custom category
+	function addCategory() {
+		if (customCategory.trim() !== '' && !categories.includes(customCategory)) {
+			categories = [...categories, customCategory];
+			newCategory = customCategory; // Set the new category as the selected one
+			customCategory = ''; // Clear input field after adding
+			addingNewCategory = false; // Hide the input field
+		}
+	}
+
+	// Delete a category if it's not in use
+	function deleteCategory(categoryToDelete) {
+		const inUse = todos.some(todo => todo.category === categoryToDelete);
+		if (!inUse) {
+			categories = categories.filter(category => category !== categoryToDelete);
+		} else {
+			alert(`Category "${categoryToDelete}" is in use and cannot be deleted.`);
+		}
+	}
+
+	// Handle category selection
+	function handleCategoryChange(category) {
+		newCategory = category;
+		addingNewCategory = false; // Hide input if an existing category is selected
 	}
 
 	// Handle keypress (enter) for adding todo
@@ -100,12 +126,36 @@
 			on:keypress={handleKeyPress}
 			placeholder="Todo Name"
 		/>
-		<input
-			type="text"
-			bind:value={newCategory}
-			on:keypress={handleKeyPress}
-			placeholder="Category"
-		/>
+
+		<!-- Custom Dropdown for categories -->
+		<div class="dropdown">
+			<button class="dropdown-button">
+				{newCategory || 'Select Category'}
+			</button>
+			<ul class="dropdown-menu">
+				{#each categories as category}
+					<li>
+						<span on:click={() => handleCategoryChange(category)}>{category}</span>
+						<button on:click={() => deleteCategory(category)} class="bg-red-500 text-white ml-4 p-1 rounded">x</button>
+					</li>
+				{/each}
+				<li>
+					<!-- Show input for new category instead of a button -->
+					{#if addingNewCategory}
+						<input
+							type="text"
+							bind:value={customCategory}
+							placeholder="New Category"
+							on:keypress={(e) => { if (e.key === 'Enter') addCategory(); }}
+						/>
+						<button on:click={addCategory} class="bg-green-500 text-white p-2 rounded">Add</button>
+					{:else}
+						<button on:click={() => addingNewCategory = true}>+ Add New Category</button>
+					{/if}
+				</li>
+			</ul>
+		</div>
+
 		<input
 			type="date"
 			bind:value={newDate}
@@ -162,7 +212,7 @@
 		margin: auto;
 	}
 
-	input[type="text"], input[type="date"] {
+	input[type="text"], input[type="date"], select {
 		padding: 8px;
 		margin-right: 8px;
 	}
@@ -189,10 +239,45 @@
 		cursor: pointer;
 	}
 
-	input[type="text"], input[type="date"] {
+	input[type="text"], input[type="date"], select {
 		flex-grow: 1;
+	}
+
+	.dropdown {
+		position: relative;
+		display: inline-block;
+	}
+
+	.dropdown-button {
+		padding: 8px;
+		border: 1px solid #ccc;
+		cursor: pointer;
+	}
+
+	.dropdown-menu {
+		display: none;
+		position: absolute;
+		background-color: white;
+		box-shadow: 0 8px px rgba(0, 0, 0, 0.2);
+		list-style: none;
+		padding: 10px;
+		width: 300px;
+		z-index: 1;
+	}
+
+	.dropdown:hover .dropdown-menu {
+		display: block;
+	}
+
+	.mt-4 {
+		margin-top: 1rem;
 	}
 </style>
 
+
+
+  
+  
+  
   
   
